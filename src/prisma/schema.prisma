@@ -1,0 +1,240 @@
+datasource db {
+  provider = "postgresql"
+  url      = "postgresql://MutterCorp:ma128sio4@localhost:5932/MutterCorp"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model user {
+  id           Int             @id @default(autoincrement())
+  username     String          @unique
+  email        String          @unique
+  passwordhash passwordhash?
+  usecase      usecase         @default(unkown)
+  createdat    DateTime        @default(now())
+  cookies      cookie[]
+  permission   permission[]
+  userlog      userlog[]
+  wallet       wallet?
+  product      product[]
+  order        order[]
+  profile      users_profile[]
+}
+
+model statistics_team {
+  league_team_id Int @unique()
+  league_teamid  league_teams @relation(fields: [league_team_id], references: [id])
+  fixtures Json
+  biggest Json
+  goals Json
+  clean_sheet Json
+  failed_to_score Json
+  penalty Json
+  lineups Json
+  cards Json
+}
+
+
+model fixture_round {
+  id Int @id @default(autoincrement())
+  round String
+  seasson Int
+  league Json
+  leagues_teams_id Int
+  status Json
+  venus Json
+  date DateTime
+  goals Json
+  score Json
+  fulltime Json
+  extratime Json
+  penalty Json
+}
+
+
+model football_players {
+  id          Int           @id @default(autoincrement())
+  name        String
+  lastname    String
+  age         Int
+  birth       Json
+  nationality String
+  height      String
+  weight      String
+  injured     Boolean
+  photo       String
+  statistics  Json
+  team_player team_player[]
+}
+
+model team_player {
+  id        Int              @id @default(autoincrement())
+  team_id   Int
+  teamid    team             @relation(fields: [team_id], references: [id])
+  player_id Int
+  playerid  football_players @relation(fields: [player_id], references: [id])
+  @@unique([team_id, player_id])
+}
+
+model product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  userid      Int
+  user        user     @relation(fields: [userid], references: [id])
+  createdat   DateTime @default(now())
+  orders      order[]
+}
+
+model order {
+  id        Int      @id @default(autoincrement())
+  productid Int
+  product   product  @relation(fields: [productid], references: [id])
+  userid    Int
+  user      user     @relation(fields: [userid], references: [id])
+  quantity  Int
+  total     Float
+  createdat DateTime @default(now())
+}
+
+model wallet {
+  id             Int              @id @default(autoincrement())
+  balance        Float            @default(0)
+  userid         Int              @unique
+  user           user             @relation(fields: [userid], references: [id])
+  createdat      DateTime         @default(now())
+  walletmovement walletmovement[]
+}
+
+model walletmovement {
+  id           Int          @id @default(autoincrement())
+  walletid     Int
+  wallet       wallet       @relation(fields: [walletid], references: [id])
+  amount       Float
+  movementtype movementtype
+  createdat    DateTime     @default(now())
+}
+
+enum typecup {
+  Cup
+  Champion
+}
+
+model leagues {
+  id           Int            @unique()
+  name         String
+  cup          typecup
+  country      String
+  code         String
+  flag         String
+  league_teams league_teams[]
+}
+
+model league_teams {
+  id              Int               @id @default(autoincrement())
+  league_id       Int
+  leagues         leagues           @relation(fields: [league_id], references: [id])
+  team_id         Int
+  teamid          team              @relation(fields: [team_id], references: [id])
+  statistics_team statistics_team[]
+  @@unique([league_id, team_id])
+}
+
+model country {
+  name String @unique
+  code String
+  flag String
+}
+
+model team {
+  id           Int            @unique()
+  name         String
+  code         String
+  founded      Int
+  national     Boolean
+  logo         String
+  venues       Json
+  league_teams league_teams[]
+  player_team  team_player[]
+}
+
+enum movementtype {
+  deposit
+  withdrawal
+}
+
+model lead {
+  id          Int      @id @default(autoincrement())
+  firstname   String
+  lastname    String
+  email       String
+  phone       String?
+  description String
+  createdat   DateTime @default(now())
+}
+
+model passwordhash {
+  id        Int      @id @default(autoincrement())
+  userid    Int      @unique
+  user      user     @relation(fields: [userid], references: [id])
+  hash      String
+  salt      String
+  createdat DateTime @default(now())
+}
+
+model permissionlog {
+  id           Int        @id @default(autoincrement())
+  permissionid Int
+  permision    permission @relation(fields: [permissionid], references: [id])
+  action       String
+  createdat    DateTime   @default(now())
+}
+
+model userlog {
+  id       Int      @id @default(autoincrement())
+  userid   Int
+  user     user     @relation(fields: [userid], references: [id])
+  action   String
+  createat DateTime @default(now())
+}
+
+model permission {
+  id            Int             @id @default(autoincrement())
+  name          String
+  description   String
+  userid        Int
+  permission    user            @relation(fields: [userid], references: [id])
+  createdat     DateTime        @default(now())
+  permissionlog permissionlog[]
+}
+
+model users_profile {
+  id             Int    @id @default(autoincrement())
+  name           String
+  lastname       String
+  street         String
+  phone_number   String
+  number_address Int
+  neigh          String
+  userid         Int
+  profile        user   @relation(fields: [userid], references: [id])
+}
+
+enum usecase {
+  unkown
+  admin
+  moderator
+  member
+  bank
+}
+
+model cookie {
+  id        Int      @id @default(autoincrement())
+  value     String   @unique
+  userid    Int
+  user      user     @relation(fields: [userid], references: [id])
+  createdat DateTime @default(now())
+}

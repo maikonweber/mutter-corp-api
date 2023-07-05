@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  # app_prod:
+  #   container_name: "nest_app"
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.dev
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - .:/home/node/app
+  #     - /home/node/app/dist
+  #     - /home/node/app/node_modules
+  #   depends_on:
+  #     - db
+  #     - redis
+  db:
+    container_name: MutterCorp
+    image: postgres:11.6-alpine
+    environment:
+      - POSTGRES_USER=MutterCorp
+      - POSTGRES_PASSWORD=ma128sio4
+      - POSTGRES_DB=MutterCorp
+      - POSTGRES_HOST=localhost
+      - POSTGRS_INITDB_ARGS=--locale=en_US.UTF-8
+    ports:
+      - 5932:5432
+  redis:
+    container_name: redis_machine
+    image: redis:7.2-rc-alpine
+    ports:
+      - 6379:6379
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 100s
+      timeout: 100s
+      retries: 3

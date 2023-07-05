@@ -1,0 +1,21 @@
+
+FROM node:16.18.0-slim
+
+USER node
+
+RUN mkdir -p /home/node/app
+
+WORKDIR /home/node/app
+
+RUN chown -R node:node /home/node/app
+
+COPY --chown=node:node package.json package-lock.json ./    
+
+COPY --chown=node:node . .
+
+RUN npm install --quiet
+
+RUN npm run build
+
+CMD ["npm", "run", "start:prod"]
+
