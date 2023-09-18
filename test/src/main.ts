@@ -7,7 +7,7 @@ import * as cors from 'cors';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: {
-      origin: true, // Allow all origins
+      origin: true, // Allow all origin  s
       methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify the allowed HTTP methods
       allowedHeaders: ['Content-Type', 'Authorization'], // Specify the allowed headers
     },

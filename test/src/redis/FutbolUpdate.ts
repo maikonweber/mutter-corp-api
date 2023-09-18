@@ -6,7 +6,6 @@ import axios from 'axios';
 
 @Injectable()
 export class FutbolUpdadeService {
-
   private readonly BASE_URL = 'https://v3.football.api-sports.io/';
   private readonly TOKEN = 'db90e4fb0c6f9d6db2c53bd53232d502';
   private readonly Country = 'Brazil'
@@ -14,18 +13,45 @@ export class FutbolUpdadeService {
     private readonly redis: RedisService,
     private readonly prisma: PrismaService
   ) {
-  }
 
-  async getBestPlayerScore(league: number, season: number, current: any): Promise<any> {
-    const player = await this.prisma.football_players.findFirstOrThrow();
-    if (!player) {
-      return
+  }
+  async getLeagueCountry(Country): Promise < string > {
+    try {
+      const response = await axios.get(`${this.BASE_URL}/leagues`, {
+        headers: {
+          'x-apisports-key': this.TOKEN
+        }, params: {
+          country: Country || this.Country
+        }
+      });
+  
+      response.data.response.forEach(async leagues => {
+        const { id, name, type, logo } = leagues.league
+        console.log(leagues)
+        const flag = logo;
+        const country = leagues.country.name;
+        const code = leagues.country.code;
+        const cup = type === "Cup" ? "Cup" : "Champion";
+        await this.prisma.leagues.create({
+          data: {
+            id,
+            name,
+            cup,
+            flag,
+            country,
+            code
+          }
+        })
+      })
+        await this.redis.subtractValueFromKey(`${'rate-limit'}`, 1)
+        return response.data.data
+  
+    } catch(err) {
+      console.log(err)
     }
   }
 
-
   async getCurrentRound(league: number, season: number, current: boolean) {
-
     const response = await axios.get(`${this.BASE_URL}/fixtures`, {
       headers: {
         'x-apisports-key': this.TOKEN
@@ -34,7 +60,6 @@ export class FutbolUpdadeService {
         season: season,
       }
     })
-
 
     let key_prevent = `${league}-${season}-prevent`
     let key_next = `${league}-${season}-next`
@@ -52,16 +77,8 @@ export class FutbolUpdadeService {
 
   }
 
-  async getLeagueTeams(): Promise < string > {
-
-
-  throw new Error('Method not implemented.');
-}
-
-
-
   async getStatistAboutTeam(team_id: number, season: number, league_id: number): Promise < void> {
-
+  let key = `${team_id}_${season}_${league_id}`
   const response = await axios.get(`${this.BASE_URL}/statistic`, {
     headers: {
       'x-apisports-key': this.TOKEN
@@ -72,7 +89,9 @@ export class FutbolUpdadeService {
     }
   });
   await this.redis.subtractValueFromKey(`${'rate-limit'}`, 1)
-    return response.data.response
+  await this.redis.setKeyValue(key, JSON.stringify(response.data.response))
+  await this.redis.expireKey(key, 7200);
+  return response.data.response
 }
 
   async GetCurrentRound(league: number, season: number, current: boolean): Promise < any > {
@@ -92,49 +111,9 @@ export class FutbolUpdadeService {
   await this.redis.subtractValueFromKey(`${'rate-limit'}`, 1)
 }
 
-  async getLeagueCountry(Country): Promise < string > {
-  try {
-    const response = await axios.get(`${this.BASE_URL}/leagues`, {
-      headers: {
-        'x-apisports-key': this.TOKEN
-      }, params: {
-        country: Country || this.Country
-      }
-    });
-
-    response.data.response.forEach(async leagues => {
-      const { id, name, type, logo } = leagues.league
-      console.log(leagues)
-      const flag = logo;
-      const country = leagues.country.name;
-      const code = leagues.country.code;
-      const cup = type === "Cup" ? "Cup" : "Champion";
-      await this.prisma.leagues.create({
-        data: {
-          id,
-          name,
-          cup,
-          flag,
-          country,
-          code
-        }
-      })
-    })
-      await this.redis.subtractValueFromKey(`${'rate-limit'}`, 1)
-      return response.data.data
-
-  } catch(err) {
-    console.log(err)
-  }
-}
-
-  async getTeamBySeasson(name): Promise < any > {
-  // const league_id = await this.prisma.leagues.findFirstOrThrow({
-  //   select: {
-  //     name: name
-  //   }
-  // })
-
+  
+async getTeamBySeasson(name): Promise < any > {
+  
   const response = await axios.get(`${this.BASE_URL}/teams`, {
     headers: {
       'x-apisports-key': this.TOKEN
@@ -144,7 +123,7 @@ export class FutbolUpdadeService {
   })
 
 
-    response.data.response.forEach(async (element) => {
+  response.data.response.forEach(async (element) => {
     let { team, venue } = element;
     let venues = venue;
 
@@ -166,15 +145,11 @@ export class FutbolUpdadeService {
 }
 
 
-  async getTeamRelationLeague() {
-
-}
-
-
   async getAllLeague() {
   try {
     const league = await this.prisma.leagues.findMany()
     return league;
+  
   } catch (er) {
     console.log(er)
   }

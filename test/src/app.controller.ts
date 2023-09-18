@@ -3,6 +3,7 @@ import AppService from './app.service';
 import { Request } from '@nestjs/common';
 import { FutbolUpdadeService } from './redis/FutbolUpdate';
 import { FullDashboard } from './dto/fullDashboard.dto';
+import { TeamStatictDTO } from './dto/fullDashboard.dto' 
 
 @Controller()
 export class AppController {
@@ -12,7 +13,6 @@ export class AppController {
   ) { }
 
   @Get('/get-current-round')
-
   async getCurrentRound(@Request() req: FullDashboard): Promise<any> {
     this.logger.log('Get Current Round');
     let league = 71;
@@ -22,14 +22,13 @@ export class AppController {
   }
 
   @Get('/get-player-score')
-  getLeagueTeams(@Request() req: any): Promise<string> {
-    return this.appService.getBestPlayerScore(71, 2023, true);
-
+  getLeagueTeams(@Request() req: TeamStatictDTO): Promise<string> {
+    return this.appService.getBestPlayerScore(req.league, req.season, true);
   }
 
-
+  // Falta Criar o DTO AQUI
   @Get('/get-team-leagues-statict')
-  getAllLeaguesAvailable(@Request() req: any): Promise<any> {
+  getAllLeaguesAvailable(@Request() req: TeamStatictDTO): Promise<any> {
     return this.appService.getTeamStatist();
   }
 

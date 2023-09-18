@@ -9,3 +9,10 @@ export class FullDashboardResponse {
   league: any;
   team_statistic: any;
 }
+
+export class TeamStatictDTO {
+  season : number;
+  leagues: number;
+  current: number;
+  team_id: number;
+}

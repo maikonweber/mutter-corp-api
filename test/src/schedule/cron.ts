@@ -43,27 +43,19 @@ export class TasksService {
     }
   }
 
+
   @Cron('0 0 * * 3,0')
-  async updateTeamStatistics() {
-
-    this.logger.verbose("Update each team statisct run every thusday");
-
-    const teams_in_season = await this.prisma.league_teams.findMany()
-
-    this.logger.log(teams_in_season);
-
-    for (const league in teams_in_season) {
-
-      const teams_static =  await this.FutbolUpdate.getStatistAboutTeam(71, 2023, 71)
-
-       return
-    }
-
+  async createLeagues() {
+    // Todos Campenatos no Brasil
+    // Campeonatos de Basket    
+    this.logger.verbose("Update the current Leagues")
+    this.FutbolUpdate.getLeagueCountry('Brazil');
+    this.FutbolUpdate.getTeamBySeasson('Brazil');
   }
 
-  async
-
-
-
-
+  @Cron('0 0 * * 3,0')
+  async createStatusTeam () {
+    this.logger.verbose("Get All Teams Present the Caching");
+    this.FutbolUpdate.getStatistAboutTeam
+  }
 }

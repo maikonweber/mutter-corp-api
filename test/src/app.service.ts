@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from './prisma/prisma.service';
 import { RedisService } from "./redis/redis";
 import { FutbolUpdadeService } from './redis/FutbolUpdate';
+
 @Injectable()
 export default class AppService {
   getLeagueTeams(): Promise<string> {
@@ -38,17 +39,11 @@ export default class AppService {
 
     return caching;
   }
-
-  async getTeamStatist(): Promise<any> {
-    const team = '';
-    const season = '';
-    const caching = await this.redis.get(`${team}-${season}-statistic`);
+  // Get Team Statist Deve estar pronto!!
+  async getTeamStatist(team, season, league_id): Promise<any> {
+    const caching = await this.redis.get(`${team}-${season}-${league_id}_statistic`);
     if (!caching) {
-      const findTeamStatict = await this.prisma.statistics_team.findMany({
-        where: {
-
-        }
-      });
+      const findTeamStatict = this.futbol.getStatistAboutTeam(team, season, league_id);
       return findTeamStatict;
     }
 

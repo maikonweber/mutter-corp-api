@@ -19,9 +19,16 @@ export class TasksService {
   ) {
   }
 
+  // Cron Jobs // 
+  // Observação : O Motivo da Existencias do Serviço de Cron Jobs para atulizar de fato.
+  // todas as informação da memória e deixar um pré carregamentos de dados importantes.
+  // Sendo assim este sempre disponível neste chamadas.
+
   @Cron('1 0 * * *')
   async updateRateLimit() {
+    // Faz a atualização de Rate Limit de Chamadas para API_SPORTS
     // Calculate the remaining seconds until 00:59
+    // Calculte the remaining call to server to response 
     this.logger.verbose("Update Rate Limit Information");
     const currentDate = new Date();
     const currentHour = currentDate.getHours();
@@ -46,7 +53,11 @@ export class TasksService {
   @Cron('0 0 * * 3,0')
   async updateTeamStatistics() {
 
+    // Calcular a estistiscas dos times todas as Terças Feiras
+    // 
+
     this.logger.verbose("Update each team statisct run every thusday");
+
 
     const teams_in_season = await this.prisma.league_teams.findMany()
 
@@ -60,10 +71,4 @@ export class TasksService {
     }
 
   }
-
-  async
-
-
-
-
 }

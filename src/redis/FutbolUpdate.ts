@@ -34,7 +34,6 @@ export class FutbolUpdadeService {
     for (let players of response.data.response) {
       console.log(players);
       await this.redis.sadd(key_player, players);
-    
     }
 
     return this.redis.smembers(key_player)
