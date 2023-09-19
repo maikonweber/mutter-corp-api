@@ -9,7 +9,7 @@ import { jwtConstants } from './auth/jwtConstant';
 import { CustomerModule } from './customer/customer.module';
 import { LeadsModule } from './leads/leads.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaService } from './prisma/PrismaService';
 import { RedisService } from './redis/redis';
 import { TasksService } from './schedule/cron';
 import { LoggerMiddleware } from './logger.middleware';

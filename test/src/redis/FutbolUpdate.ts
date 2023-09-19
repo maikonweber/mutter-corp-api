@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { RedisService } from "./redis";
-import { PrismaService } from "src/prisma/prisma.service";
+import { PrismaService } from 'src/prisma/PrismaService';
 import { FullDashboard } from "src/dto/fullDashboard.dto";
 import axios from 'axios';
 

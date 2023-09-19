@@ -1,5 +1,5 @@
 import { CreateCustomerDto, SessionCookieDto } from './dto/create-customer.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma/PrismaService';
 import { Prisma } from '@prisma/client';
 import {
   Injectable,

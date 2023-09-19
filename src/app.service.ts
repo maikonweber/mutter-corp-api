@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from './prisma/prisma.service';
+import { PrismaService } from './prisma/PrismaService';
 import { RedisService } from "./redis/redis";
 import { FutbolUpdadeService } from './redis/FutbolUpdate';
 

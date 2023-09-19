@@ -1,5 +1,5 @@
 import { Body, Controller, Logger, Post, Get } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from 'src/prisma/PrismaService';
 import { CreateLeadDTO } from './dto/lead.customer.dto'
 import { LeadsService } from './leads.service';
 @Controller('leads')

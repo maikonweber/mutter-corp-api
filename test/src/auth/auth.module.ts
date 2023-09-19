@@ -6,7 +6,7 @@ import { CustomerService } from 'src/customer/customer.service';
 import { LocalStrategy } from './local.auth';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from "@nestjs/passport"
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma/PrismaService';
 import { jwtConstants } from './jwtConstant';
 import { AuthGuardService } from './authGuard';
 

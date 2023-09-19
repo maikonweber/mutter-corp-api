@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { LeadsService } from './leads.service';
 import { LeadsController } from './leads.controller';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma/PrismaService';
 import { TasksService } from 'src/schedule/cron';
 import { FutbolUpdadeService } from 'src/redis/FutbolUpdate';
 @Module({

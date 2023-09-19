@@ -6,7 +6,7 @@ import axios from 'axios';
 import { error } from 'console';
 import { RedisService } from 'src/redis/redis';
 import { Cron } from '@nestjs/schedule';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma/PrismaService';
 
 @Injectable()
 export class TasksService {

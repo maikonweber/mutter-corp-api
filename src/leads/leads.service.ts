@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from 'src/prisma/PrismaService';
 import { CreateLeadDTO } from './dto/lead.customer.dto';
 @Injectable()
 export class LeadsService {
