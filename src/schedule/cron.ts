@@ -43,13 +43,13 @@ export class TasksService {
   }
 
 
-  @Cron('15 0 * * *')
+  @Cron('48 12 * * *')
   async updateNextRound() {
     this.logger.verbose("Atualizaçando o campeonato brasileiro para proxima semana")
     await this.FutbolUpdate.updateNextWeak(71, 2023, true);
   }
 
-  @Cron('0 1 * * *')
+  @Cron('0 13 * * *')
   async updatePredictionRound() {
     const objetcRedisWeakFixture = await this.redis.get('71_2023_next_weak_season');
     const parsedAll = JSON.parse(objetcRedisWeakFixture);
@@ -62,7 +62,7 @@ export class TasksService {
       await this.redis.set(id, JSON.stringify(prediction));
     }
   }
-  @Cron('30 17 * * *')
+  @Cron('01 13 * * *')
   async updateOddBookmaker() {
     const bookmaker = 8; // BET365
     const objetcRedisWeakFixture = await this.redis.get('71_2023_next_weak_season');
