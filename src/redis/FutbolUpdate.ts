@@ -1,25 +1,31 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { RedisService } from "./redis";
 import { PrismaService } from 'src/prisma/PrismaService';
 import { FullDashboard } from "src/dto/fullDashboard.dto";
 import axios from 'axios';
+import { timestamp } from "rxjs";
+import { time } from "console";
+import { response } from "express";
 
 @Injectable()
 export class FutbolUpdadeService {
-
+  private readonly logger = new Logger(FutbolUpdadeService.name);
   private readonly BASE_URL = 'https://v3.football.api-sports.io/';
   private readonly TOKEN = 'db90e4fb0c6f9d6db2c53bd53232d502';
   private readonly Country = 'Brazil'
+
   constructor(
     private readonly redis: RedisService,
     private readonly prisma: PrismaService
   ) {
   }
 
+  delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
   async getBestPlayerScore(league: number, season: number, current: any): Promise<any> {
     // const player = await this.prisma.football_players.findFirstOrThrow();
-
-
     const response = await axios.get(`${this.BASE_URL}/players`, {
       headers: {
         'x-apisports-key': this.TOKEN
@@ -29,21 +35,12 @@ export class FutbolUpdadeService {
       }
     })
 
-    let key_player = 'best-score-player'
 
-    for (let players of response.data.response) {
-      console.log(players);
-      await this.redis.sadd(key_player, players);
-    
-    }
-
-    return this.redis.smembers(key_player)
-
+    return response.data.response
   }
 
-
-  async getCurrentRound(league: number, season: number, current: boolean) {
-
+  async updateNextWeak(league: number, season: number, current: boolean) {
+    console.log(league, season)
     const response = await axios.get(`${this.BASE_URL}/fixtures`, {
       headers: {
         'x-apisports-key': this.TOKEN
@@ -53,33 +50,53 @@ export class FutbolUpdadeService {
       }
     })
 
+    const nextWeakRound = []
+    const hoje = new Date();
+    const seteDiasDepois = new Date(hoje.getTime() + (7 * 24 * 60 * 60 * 1000));
+    const timestamp = Math.floor(seteDiasDepois.getTime() / 1000);
+    
+    for (const fixture of response.data.response) {
+        if (fixture['fixture']['timestamp'] <= timestamp && fixture['fixture']['timestamp'] >= Math.floor(hoje.getTime() / 1000)) {
+          console.log(fixture['fixture']['timestamp'] <= timestamp && fixture['fixture']['timestamp'] >= hoje.getTime );
+          nextWeakRound.push(fixture);
+        }
+    }
 
-    let key_prevent = `${league}-${season}-prevent`
-    let key_next = `${league}-${season}-next`
-    let now = new Date().valueOf();
+    console.log(nextWeakRound);
 
-    for (let rounds of response.data.response) {
-      let timestamp = rounds['fixture']['timestamp']
-      console.log(timestamp < now);
-      if (timestamp < now) {
-        await this.redis.sadd(key_next, JSON.stringify(rounds))
-      } else {
-        await this.redis.sadd(key_prevent, JSON.stringify(rounds));
+    await this.redis.set(`${league}_${season}_next_weak_season`, JSON.stringify(nextWeakRound));
+  }
+
+  async oddFixturesUpdate(bookmaker: number, fixture_id: number) {
+    const response = await axios.get(`${this.BASE_URL}/odds`, {
+      headers: {
+        'x-apisports-key': this.TOKEN
+      }, params: {
+        fixture: fixture_id,
+        bookmaker: bookmaker
       }
+    })
+    const response_stract = response.data.response;
 
-    };
-
-    return this.redis.smembers(key_next);
+    return response_stract
 
   }
 
-  async getLeagueTeams(): Promise<string> {
 
 
-    throw new Error('Method not implemented.');
+  async getCurrentRound(league: number, season: number, current: boolean) {
+    console.log(league, season)
+    const response = await axios.get(`${this.BASE_URL}/fixtures`, {
+      headers: {
+        'x-apisports-key': this.TOKEN
+      }, params: {
+        league: league,
+        season: season,
+      }
+    })
+
+    return response.data.response
   }
-
-
 
   async getStatistAboutTeam(team_id: number, season: number, league_id: number): Promise<void> {
     const response = await axios.get(`${this.BASE_URL}/statistic`, {
@@ -95,120 +112,21 @@ export class FutbolUpdadeService {
     return response.data.response
   }
 
-  async GetCurrentRound(league: number, season: number, current: boolean): Promise<any> {
-    const response = await axios.get(`${this.BASE_URL}/fixtures/rounds`, {
+
+
+  async fixturesPredictionRound(fixture: number): Promise<any> {
+    const response = await axios.get(`${this.BASE_URL}/predictions`, {
       headers: {
         'x-apisports-key': this.TOKEN
       }, params: {
-        league: league,
-        season: season,
-        current: true
+        fixture: fixture
       }
     })
 
-    response.data.response.forEach(async element => {
-      await this.redis.sadd(`${league}}-${season}-current`, element)
-    });
-    await this.redis.subtractValueFromKey(`${'rate-limit'}`, 1)
+    console.log(response.data.response);
+
+    return response.data.response
   }
-
-  async getLeagueCountry(Country): Promise<string> {
-    try {
-      const response = await axios.get(`${this.BASE_URL}/leagues`, {
-        headers: {
-          'x-apisports-key': this.TOKEN
-        }, params: {
-          country: Country || this.Country
-        }
-      });
-
-      response.data.response.forEach(async leagues => {
-        const { id, name, type, logo } = leagues.league
-        console.log(leagues)
-        const flag = logo;
-        const country = leagues.country.name;
-        const code = leagues.country.code;
-        const cup = type === "Cup" ? "Cup" : "Champion";
-        await this.prisma.leagues.create({
-          data: {
-            id,
-            name,
-            cup,
-            flag,
-            country,
-            code
-          }
-        })
-      })
-      await this.redis.subtractValueFromKey(`${'rate-limit'}`, 1)
-      return response.data.data
-
-    } catch (err) {
-      console.log(err)
-    }
-  }
-
-  async getTeamBySeasson(name): Promise<any> {
-    // const league_id = await this.prisma.leagues.findFirstOrThrow({
-    //   select: {
-    //     name: name
-    //   }
-    // })
-
-    const response = await axios.get(`${this.BASE_URL}/teams`, {
-      headers: {
-        'x-apisports-key': this.TOKEN
-      }, params: {
-        country: 'Brazil'
-      }
-    })
-
-
-    response.data.response.forEach(async (element) => {
-      let { team, venue } = element;
-      let venues = venue;
-
-      const { id, name, code = '', founded, national, logo } = team;
-
-      try {
-
-        await this.prisma.team.create({
-          data: {
-            id, name, code, founded, national, logo, venues
-          }
-        })
-      } catch (er) {
-        console.log(er)
-      }
-    })
-    await this.redis.subtractValueFromKey(`${'rate-limit'}`, 1)
-    return response.data.response;
-  }
-
-
-  async getTeamRelationLeague() {
-
-  }
-
-
-  async getAllLeague() {
-    try {
-      const league = await this.prisma.leagues.findMany()
-      return league;
-    } catch (er) {
-      console.log(er)
-    }
-  }
-
-  async getAllTeam() {
-    try {
-      const team = await this.prisma.team.findMany();
-      return team;
-    } catch (er) {
-      console.log(er);
-    }
-  }
-
 }
 
 

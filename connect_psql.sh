@@ -1,1 +1,1 @@
-psql -U MutterCorp -d MutterCorp -h localhost -p 5932 
+psql -U MutterCorp -d MutterCorp -h localhost -p 5932 < team.sql

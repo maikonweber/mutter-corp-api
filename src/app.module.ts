@@ -24,9 +24,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     CustomerModule,
     AuthModule,
     LeadsModule,
-    WebsocketModule,
     
-
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '5d' }

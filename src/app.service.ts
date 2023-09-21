@@ -18,24 +18,25 @@ export default class AppService {
 
   }
 
-  async getCurrentRound(league: number, season: number, current: boolean): Promise<any> {
-    const caching_prevent = await this.redis.smembers(`${league}-${season}-prevent`)
-    const caching_next = await this.redis.smembers(`${league}-${season}-next`)
-
-    if (caching_prevent.length < 1) {
-      const current = await this.futbol.getCurrentRound(league, season, true);
-      return current;
-    }
-
-    return [caching_prevent, caching_next];
+  async nextUpdateWeak(league:number, season: number, current: boolean) : Promise<any> {
+    await this.futbol.updateNextWeak(league, season, current);
   }
 
-  async getBestPlayerScore(league: number, season: number, current: boolean): Promise<any> {
-    const caching = await this.redis.get(`cache-best-score`);
-    if (!caching) {
-      return this.futbol.getBestPlayerScore(league, season, current);
-    }
+  async getCurrentRound(league: number, season: number, current: boolean): Promise<any> {
+    const cached = await this.redis.get(`${league}_${season}_next_weak_season`)
+    const parsedCached = JSON.parse(cached);
+    return parsedCached;
+  }
 
+  async getFixtureDisplay(fixture_id: number): Promise<any> {
+    const caching = await this.redis.get(`${fixture_id}`);
+    const parsedCached = JSON.parse(caching);
+    return caching;
+  }
+
+  async getOddDisplay(fixture_id: number, bookmaker: number): Promise<any> {
+    const caching = await this.redis.get(`${fixture_id}`);
+    const parsedCached = JSON.parse(caching);
     return caching;
   }
 

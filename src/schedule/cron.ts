@@ -1,8 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as
-schedule from '@nestjs/schedule';
 import { FutbolUpdadeService } from 'src/redis/FutbolUpdate';
-import axios from 'axios';
 import { error } from 'console';
 import { RedisService } from 'src/redis/redis';
 import { Cron } from '@nestjs/schedule';
@@ -10,6 +7,7 @@ import { PrismaService } from 'src/prisma/PrismaService';
 
 @Injectable()
 export class TasksService {
+
   private readonly logger = new Logger(TasksService.name);
   private readonly nameOfRateLimit: string = "futbolRateLimit"
   constructor(
@@ -17,6 +15,7 @@ export class TasksService {
     private readonly redis: RedisService,
     private readonly prisma: PrismaService
   ) {
+
   }
 
   @Cron('1 0 * * *')
@@ -43,27 +42,39 @@ export class TasksService {
     }
   }
 
-  @Cron('0 0 * * 3,0')
-  async updateTeamStatistics() {
 
-    this.logger.verbose("Update each team statisct run every thusday");
+  @Cron('15 0 * * *')
+  async updateNextRound() {
+    this.logger.verbose("Atualizaçando o campeonato brasileiro para proxima semana")
+    await this.FutbolUpdate.updateNextWeak(71, 2023, true);
+  }
 
-    const teams_in_season = await this.prisma.league_teams.findMany()
+  @Cron('0 1 * * *')
+  async updatePredictionRound() {
+    const objetcRedisWeakFixture = await this.redis.get('71_2023_next_weak_season');
+    const parsedAll = JSON.parse(objetcRedisWeakFixture);
 
-    this.logger.log(teams_in_season);
-
-    for (const league in teams_in_season) {
-
-      const teams_static =  await this.FutbolUpdate.getStatistAboutTeam(71, 2023, 71)
-
-       return
+    for (const fixture of parsedAll) {
+      const id = fixture['fixture']['id'];
+      this.logger.verbose("Atualizaçando o campeonato fixture para proxima semana", id)
+      const prediction = await this.FutbolUpdate.fixturesPredictionRound(id)
+      await this.FutbolUpdate.delay(60000);
+      await this.redis.set(id, JSON.stringify(prediction));
+    }
+  }
+  @Cron('30 17 * * *')
+  async updateOddBookmaker() {
+    const bookmaker = 8; // BET365
+    const objetcRedisWeakFixture = await this.redis.get('71_2023_next_weak_season');
+    const parsedAll = JSON.parse(objetcRedisWeakFixture);
+    
+    for (const fixture of parsedAll) {
+      const id = fixture['fixture']['id'];
+      this.logger.verbose("Atualizaçando Odds fixtures", id)
+      const prediction = await this.FutbolUpdate.oddFixturesUpdate(bookmaker, id)
+      await this.FutbolUpdate.delay(60000);
+      await this.redis.set(`${id}_${bookmaker}_odds`, JSON.stringify(prediction));
     }
 
   }
-
-  async
-
-
-
-
-}
+} 
