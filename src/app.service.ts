@@ -35,7 +35,7 @@ export default class AppService {
   }
 
   async getOddDisplay(fixture_id: number, bookmaker: number): Promise<any> {
-    const caching = await this.redis.get(`${fixture_id}`);
+    const caching = await this.redis.get(`${fixture_id}_${bookmaker}_odds`);
     const parsedCached = JSON.parse(caching);
     return caching;
   }

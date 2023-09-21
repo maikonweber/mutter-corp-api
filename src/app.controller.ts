@@ -28,7 +28,7 @@ export class AppController {
     return this.appService.getFixtureDisplay(fixture);
   }
 
-  @Get('/get-fixture-prediction/:fixture/:bookmaker')
+  @Get('/get-odds-/:fixture/:bookmaker')
   @ApiParam({ name: 'fixture', description: 'league_id' })   
   async getOddsDisplay(@Param('fixture') fixture): Promise<string> {
     this.logger.log("Get Fixtures Odds Controller", fixture);
