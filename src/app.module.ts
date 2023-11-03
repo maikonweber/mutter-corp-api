@@ -9,7 +9,7 @@ import { jwtConstants } from './auth/jwtConstant';
 import { CustomerModule } from './customer/customer.module';
 import { LeadsModule } from './leads/leads.module';
 import { PrismaModule } from './prisma/prisma.module';
-import { PrismaService } from './prisma/PrismaService';
+import { PrismaService } from './prisma/prisma.service';
 import { RedisService } from './redis/redis';
 import { TasksService } from './schedule/cron';
 import { LoggerMiddleware } from './logger.middleware';
@@ -24,11 +24,11 @@ import { WebsocketModule } from './websocket/websocket.module';
     CustomerModule,
     AuthModule,
     LeadsModule,
-    
+    WebsocketModule,
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '5d' }
-    }),
+    })
 
   ],
   controllers: [AppController, AuthController],
