@@ -17,6 +17,7 @@ import { FutbolUpdadeService } from './redis/FutbolUpdate';
 import { WebsocketModule } from './websocket/websocket.module';
 import { TelegramService } from './telegram/telegram.service';
 import { ConfigModule } from '@nestjs/config';
+import { ShoppeService } from './shoppe/shoppe.service';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { ConfigModule } from '@nestjs/config';
     PrismaService,
     TasksService,
     TelegramService,
+    ShoppeService,
     
   ],
 })
