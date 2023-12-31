@@ -15,7 +15,8 @@ import { TasksService } from './schedule/cron';
 import { LoggerMiddleware } from './logger.middleware';
 import { FutbolUpdadeService } from './redis/FutbolUpdate';
 import { WebsocketModule } from './websocket/websocket.module';
-
+import { TelegramService } from './telegram/telegram.service';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -25,8 +26,9 @@ import { WebsocketModule } from './websocket/websocket.module';
     AuthModule,
     LeadsModule,
     WebsocketModule,
-    
-
+    ConfigModule.forRoot({
+      isGlobal: true, // Make the configuration module global
+    }),
     JwtModule.register({
       secret: jwtConstants.secret,
       signOptions: { expiresIn: '5d' }
@@ -41,6 +43,7 @@ import { WebsocketModule } from './websocket/websocket.module';
     RedisService,
     PrismaService,
     TasksService,
+    TelegramService,
     
   ],
 })

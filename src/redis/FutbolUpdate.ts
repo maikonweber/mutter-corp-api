@@ -6,7 +6,6 @@ import axios from 'axios';
 
 @Injectable()
 export class FutbolUpdadeService {
-
   private readonly BASE_URL = 'https://v3.football.api-sports.io/';
   private readonly TOKEN = 'db90e4fb0c6f9d6db2c53bd53232d502';
   private readonly Country = 'Brazil'
@@ -34,7 +33,7 @@ export class FutbolUpdadeService {
     for (let players of response.data.response) {
       console.log(players);
       await this.redis.sadd(key_player, players);
-    
+
     }
 
     return this.redis.smembers(key_player)
