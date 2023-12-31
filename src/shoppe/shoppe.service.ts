@@ -1,3 +1,4 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto'
@@ -8,6 +9,7 @@ export class ShoppeService {
     private readonly logger = new Logger(ShoppeService.name)
     private readonly key: string;
     constructor(
+        private readonly httpService: HttpService,
         private readonly configService: ConfigService,
         private readonly redisService: RedisService
         ) {
@@ -39,7 +41,7 @@ export class ShoppeService {
 
             const productArray = response.data.productOfferV2.nodes;
 
-            await this.redisService.saveListInRedis('ShopeeProduct', productArray);
+            await this.redisService.set('ShopeeProduct', productArray);
         } catch (error) {
             // Handle errors appropriately
             console.error(error.message);
