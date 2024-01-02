@@ -18,6 +18,7 @@ import { WebsocketModule } from './websocket/websocket.module';
 import { TelegramService } from './telegram/telegram.service';
 import { ConfigModule } from '@nestjs/config';
 import { ShoppeService } from './shoppe/shoppe.service';
+import { HttpService } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -46,7 +47,7 @@ import { ShoppeService } from './shoppe/shoppe.service';
     TasksService,
     TelegramService,
     ShoppeService,
-    
+
   ],
 })
 export class AppModule implements NestModule {

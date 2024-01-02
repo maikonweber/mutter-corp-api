@@ -1,20 +1,21 @@
-import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto'
+import * as crypto from 'crypto';
+import axios from 'axios'; // Import Axios library
 import { RedisService } from 'src/redis/redis';
 
 @Injectable()
 export class ShoppeService {
     private readonly logger = new Logger(ShoppeService.name)
     private readonly key: string;
+
     constructor(
-        private readonly httpService: HttpService,
         private readonly configService: ConfigService,
-        private readonly redisService: RedisService
-        ) {
+        private readonly redisService: RedisService,
+    ) {
         this.key = configService.get<string>('TELEGRAM_TOKEN');
     }
+
     async fetchDataAndSaveToRedis(keyword: string): Promise<void> {
         const appid = this.configService.get<string>('AppID');
         const senha = this.configService.get<string>('Senha');
@@ -35,9 +36,7 @@ export class ShoppeService {
         };
 
         try {
-            const response = await this.httpService
-                .post(endpoint, requestBody, { headers })
-                .toPromise();
+            const response = await axios.post(endpoint, requestBody, { headers });
 
             const productArray = response.data.productOfferV2.nodes;
 

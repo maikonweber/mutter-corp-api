@@ -44,20 +44,8 @@ export class TasksService {
   }
 
   @Cron('0 0 * * 3,0')
-  async updateTeamStatistics() {
+  async sendMessage() {
 
-    this.logger.verbose("Update each team statisct run every thusday");
-
-    const teams_in_season = await this.prisma.league_teams.findMany()
-
-    this.logger.log(teams_in_season);
-
-    for (const league in teams_in_season) {
-
-      const teams_static =  await this.FutbolUpdate.getStatistAboutTeam(71, 2023, 71)
-
-       return
-    }
 
   }
 
